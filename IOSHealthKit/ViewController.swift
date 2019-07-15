@@ -37,7 +37,7 @@ class ViewController: UIViewController {
     }
     
     func getHRVSampleQuery() {
-        let HRVType = HKQuantityType.quantityType(forIdentifier: .heartRate)
+        let HRVType = HKQuantityType.quantityType(forIdentifier: .heartRateVariabilitySDNN)
         
         let sortDescriptor = NSSortDescriptor(key:HKSampleSortIdentifierStartDate, ascending: false)
         
@@ -49,10 +49,10 @@ class ViewController: UIViewController {
             if(error == nil) {
                 for result in results! {
                     print("Startdate")
-                    print(result.startDate)
-                    print(result.sampleType)
+                    print("\(result.startDate) \n")
+                    print("\(result.sampleType) \n")
 
-                    print(result)
+//                    print(result)
 //                    print(result.me)
                 }
             }
