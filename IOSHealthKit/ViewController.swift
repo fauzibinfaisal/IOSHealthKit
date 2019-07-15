@@ -66,3 +66,9 @@ class ViewController: UIViewController {
 
 }
 
+// MARK: Resources
+
+//developer.apple.com/documentation/healthkit/setting_up_healthkit
+
+//stackoverflow.com/questions/47355242/cannot-get-hrv-readings-in-sensible-format-from-healthkit
+//stackoverflow.com/questions/47040640/track-beat-to-beat-heart-rate-apple-watch-through-hrv
