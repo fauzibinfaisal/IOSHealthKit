@@ -10,6 +10,9 @@ import UIKit
 import HealthKit
 
 class ViewController: UIViewController {
+    @IBOutlet weak var dateLabel: UILabel!
+    @IBOutlet weak var heartRateLabel: UILabel!
+    @IBOutlet weak var HRVLabel: UILabel!
     
     let healthStore = HKHealthStore()
 
@@ -33,11 +36,14 @@ class ViewController: UIViewController {
                     self.getHRVSampleQuery()
                 }
             }
+            
+            
         }
     }
     
     func getHRVSampleQuery() {
         let HRVType = HKQuantityType.quantityType(forIdentifier: .heartRateVariabilitySDNN)
+        let HRType = HKQuantityType.quantityType(forIdentifier: .heartRate)
         
         let sortDescriptor = NSSortDescriptor(key:HKSampleSortIdentifierStartDate, ascending: false)
         
@@ -45,25 +51,90 @@ class ViewController: UIViewController {
         //  Set the Predicates & Interval
         let predicate: NSPredicate? = HKQuery.predicateForSamples(withStart: startDate, end: Date(), options: HKQueryOptions.strictEndDate)
         
-        let sampleQuery = HKSampleQuery(sampleType: HRVType!, predicate: predicate, limit: 30, sortDescriptors: [sortDescriptor]) { sampleQuery, results, error  in
+        let sampleQueryHRV = HKSampleQuery(sampleType: HRVType!, predicate: predicate, limit: 1, sortDescriptors: [sortDescriptor]) { sampleQuery, results, error  in
             if(error == nil) {
                 for result in results! {
-                    print("Startdate")
-                    print("\(result.startDate) \n")
-                    print("\(result.sampleType) \n")
-
+//                    print("Startdate")
+//                    print(result.startDate)
 //                    print(result)
-//                    print(result.me)
+                    let r = result as! HKQuantitySample
+                    let quantity = r.quantity
+                    
+                    let formater = DateFormatter()
+                    formater.dateFormat = "h:mm a"
+                    let updatedDate = formater.string(from: result.startDate)
+                    let countHRV = quantity.doubleValue(for: HKUnit(from: "ms"))
+                    DispatchQueue.main.async {
+                        self.dateLabel.text = "Today \(updatedDate)"
+                        self.HRVLabel.text = String(format: "HRV: %.2f ms", countHRV)
+                    }
+
+                    
+                    //Today 09.00 AM
                 }
             }
-            
-            print("error \(error)")
-            print(results)
         }
+        
+        let sampleQuery = HKSampleQuery(sampleType: HRType!, predicate: predicate, limit: 1, sortDescriptors: [sortDescriptor]) { sampleQuery, results, error  in
+            if(error == nil) {
+                for result in results! {
+                    let r = result as! HKQuantitySample
+                    let quantity = r.quantity
+                    let countHR = quantity.doubleValue(for: HKUnit(from: "count/min"))
+                    print(" heartRate \(countHR)")
+                    
+                    DispatchQueue.main.async {
+                    self.heartRateLabel.text = String(format: "HeartRate: %.1f ms", countHR)
+                    }
+//                    print(result)
+                    
+//                    let formater = DateFormatter()
+//                    formater.dateFormat = "h:mm a"
+//                    let updatedDate = formater.string(from: result.startDate)
+//                    let countHRV = quantity.doubleValue(for: HKUnit(from: "ms"))
+//                    print("HRV: \(countHRV) ms , date: \(updatedDate)")
+//                    self.dateLabel.text = "Today \(updatedDate)"
+//                    self.HRVLabel.text = String(format: "HRV: %.2f ms", countHRV)
+                    
+                    //Today 09.00 AM
+                }
+            }
+        }
+        healthStore.execute(sampleQueryHRV)
         healthStore.execute(sampleQuery)
+        
     }
-
-
+    
+//    func fetchHeartRates(){
+//        let HRVType = HKObjectType.quantityType(forIdentifier: .heartRate)
+//
+//        let sortDescriptor = NSSortDescriptor(key:HKSampleSortIdentifierStartDate, ascending: true)
+//
+//        let startDate = Date() - 7 * 24 * 60 * 60 // start date is a week from now
+//        //  Set the Predicates & Interval
+//        let predicate: NSPredicate? = HKQuery.predicateForSamples(withStart: startDate, end: Date(), options: HKQueryOptions.strictEndDate)
+//
+//        let sampleQuery = HKSampleQuery(sampleType: HRVType!, predicate: predicate, limit: 10, sortDescriptors: [sortDescriptor]) { sampleQuery, results, error  in
+//            if(error == nil) {
+//                for result in results! {
+//                    print("Startdate")
+//                    print(result.startDate)
+//                    print(result.sampleType)
+//                    print(result)
+//
+//
+//
+//                    //                    print(result.quantity.doubleValue(for: HKUnit.secondUnit(with: .milli)))
+//                    //                    print(result)
+//
+//                    // print(result.metadata)
+//                }
+//            }
+//        }
+//        healthStore.execute(sampleQuery)
+//    }
+    
+    
 }
 
 // MARK: Resources
