@@ -13,12 +13,14 @@ class ViewController: UIViewController {
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var heartRateLabel: UILabel!
     @IBOutlet weak var HRVLabel: UILabel!
+    @IBOutlet weak var hrvProgressView: UIProgressView!
     
     let healthStore = HKHealthStore()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        // MARK: CHECK HEALTH DATA AVAILIBILITY
         if HKHealthStore.isHealthDataAvailable() {
             // Add code to use HealthKit here.
             print("Health data is available")
@@ -27,6 +29,8 @@ class ViewController: UIViewController {
                                 HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN)!,
                                 HKObjectType.quantityType(forIdentifier: .heartRate)!])
             
+            
+            // MARK: REQUEST AUTHORIZATION
             healthStore.requestAuthorization(toShare: allTypes, read: allTypes) { (success, error) in
                 if !success {
                     // Handle the error here.
@@ -36,11 +40,11 @@ class ViewController: UIViewController {
                     self.getHRVSampleQuery()
                 }
             }
-            
-            
         }
     }
     
+    
+    // MARK: HRV & HR VALUE
     func getHRVSampleQuery() {
         let HRVType = HKQuantityType.quantityType(forIdentifier: .heartRateVariabilitySDNN)
         let HRType = HKQuantityType.quantityType(forIdentifier: .heartRate)
@@ -63,12 +67,19 @@ class ViewController: UIViewController {
                     let formater = DateFormatter()
                     formater.dateFormat = "h:mm a"
                     let updatedDate = formater.string(from: result.startDate)
-                    let countHRV = quantity.doubleValue(for: HKUnit(from: "ms"))
+                    let countHRVDouble = quantity.doubleValue(for: HKUnit(from: "ms"))
+                    var countHRV = Float(countHRVDouble)/65
+                    if countHRV>1 {
+                        countHRV = Float.random(in: 0..<0.2)
+                    }
+                    let countHRVtoProgress = 1-Float(countHRVDouble)/65
+                    print(countHRVtoProgress)
+                    
                     DispatchQueue.main.async {
                         self.dateLabel.text = "Today \(updatedDate)"
-                        self.HRVLabel.text = String(format: "HRV: %.2f ms", countHRV)
+                        self.HRVLabel.text = String(format: "HRV: %.2f ms", countHRVDouble)
+                        self.hrvProgressView.setProgress(countHRVtoProgress, animated: true)
                     }
-
                     
                     //Today 09.00 AM
                 }
